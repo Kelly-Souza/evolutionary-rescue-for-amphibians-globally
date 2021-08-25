@@ -1,0 +1,2 @@
+# How likely are adaptive responses to mitigate the threats of climate change for amphibians globally?
+Souza, K. S, Jardim, L., Rodrigues, F., Batista, M. C, Rangel, T. F, Gouveia, S., et al. (2019). How likely are adaptive responses to mitigate the threats of climate change for amphibians globally? Frontiers of Biogeography, 11(3). http://dx.doi.org/10.21425/F5FBG43511 Retrieved from https://escholarship.org/uc/item/48r05850
