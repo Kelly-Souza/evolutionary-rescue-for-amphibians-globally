@@ -1,191 +1,80 @@
-rescue <- read.table("Rescue_GLOBAL_RCP85_SN_50_without_DISP_8.5_zooregions.txt",h=T)
+setwd("C:/Users/Kelly/Desktop/Frontiers_GitHub")
 
-vetorID_rescue <- rescue$ID [which (rescue$Rescue_Save_95==1)]
+out.spp <- read.table("Rescue_GLOBAL_RCP85_SN_50_without_DISP_8.5.txt",h=T)
 
-rescue_PAM <- PA[, vetorID_rescue]
-str(rescue_PAM)
+sum(ifelse(out.spp[,1] >= 10,1,0))
+sum(ifelse(out.spp[,1] >= 10,1,0))/nrow(out.spp)
 
-vetorID_rescueP <- rescue$ID [which (rescue$RescueP_Save_95==1)]
-rescue.P_PAM <- PA[, vetorID_rescueP]
+hist(out.spp[,2],nclass=100,col="grey",xlab="Standard deviations (phylogeny)",main="")
 
-PAM_rescue <- cbind(coords,rescue_PAM)
-ncol(PAM_rescue)
-PAM_rescueP <- cbind(coords,rescue.P_PAM)
-ncol(PAM_rescueP)
-str(PAM_rescueP)
-
-write.table(PAM_rescue, "PAM_rescue.txt")
-write.table(PAM_rescueP, "PAM_rescueP.txt")
-
-library(raster)
 x11()
+par(family="serif", cex.lab=1.55, cex.axis=1.55)
+hist(out.spp[,3],nclass=100,col="grey",xlab="Standard deviations ºC (range)",main="",ylab="Frequency of species" )
+
+hist(out.spp[,7]-out.spp[,6],nclass=100,col="grey",xlab="Peak shift",main="",ylab="Frequency of species")
+
+x11()
+hist(out.spp[,7]-out.spp[,6],nclass=100,col="grey",xlab="Peak shift (ºC)",main="",ylab="Frequency of species", xlim = c(1,10))
+
+hist(out.spp[,8],nclass=100,col="grey",xlab="Haldanes",ylab="Frequency of species",main="",xlim=c(0,1.0))
+hist(out.spp[,9],nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="")
+hist(out.spp[,10],nclass=50,col="grey",xlab="Probability of Rescue (H > MSER-P)",ylab="Frequency of species",main="")
+
+#rescue genetic vs. plasticity
+plot(out.spp[,9],out.spp[,10],cex=0.5,pch=16,xlab="Probability of Rescue (Genetic) - MSER",ylab="Probabilit of rescue (Plasticity) - MSER-P")
+abline(a=0,b=1,lwd=2,lty=2,col="black")
+
+median(out.spp[,3])
+median(out.spp[,7]-out.spp[,6])
+median(out.spp[,8]) #haldMedian
+
+plot(out.spp[,3],out.spp[,2]) #plot sds...
 par(mfrow=c(1,1))
-#)
-raster_riq <- rasterFromXYZ(xyz =  cbind(coords, riq), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-
-plot(raster_riq)
-writeRaster(raster_riq,"raster_riq.asc")
-
-raster_rescue<- rasterFromXYZ(xyz =  cbind(coords, rowSums(rescue_PAM)), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-plot(raster_rescue)
-writeRaster(raster_rescue,"raster_riq_rescue.95.asc")
-nrow(coords)
-nrow(rescue_PAM)
-
-x11()
-raster_rescueP <- rasterFromXYZ(xyz =  cbind(coords, rowSums(rescue.P_PAM)), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-plot(raster_rescueP)
-writeRaster(raster_rescueP,"raster_riq_rescueP.95.asc")
-
-library(maptools)
-data("wrld_simpl")
-plot(wrld_simpl, add = T, border = "black")
-
-riqueza <- rowSums(PA)
-riqueza_rescue <- rowSums(rescue_PAM)
-riqueza_rescue <- ifelse(test = riqueza > 0, yes = riqueza_rescue, no = NA)
-
-riqueza_rescue_P <- rowSums(rescue.P_PAM)
-riqueza_rescue_P <- ifelse(test = riqueza > 0, yes = riqueza_rescue_P, no = NA)
-
-riqueza <- ifelse(test = riqueza > 0, yes = riqueza, no = NA)
-
-prop_perda_Rich_Rescue <- (riqueza_rescue)/riqueza
-raster_prop_perda_Rich_Rescue <- rasterFromXYZ(xyz =  cbind(coords, prop_perda_Rich_Rescue), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-x11()
-plot(raster_prop_perda_Rich_Rescue)
-writeRaster(raster_prop_perda_Rich_Rescue,"raster_prop_perda_Rich_Rescue.asc")
-
-prop_perda_Rich_Rescue_P <- (riqueza_rescue_P)/riqueza
-raster_prop_perda_Rich_Rescue_P <- rasterFromXYZ(xyz =  cbind(coords, prop_perda_Rich_Rescue_P), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-x11()
-plot(raster_prop_perda_Rich_Rescue_P)
-writeRaster(raster_prop_perda_Rich_Rescue_P,"raster_prop_perda_Rich_Rescue_P.asc")
-
-rangeSize <- colSums(PA)
-
-class(PA.orig)
-library(raster)
-
-zooregions<- readShapePoly(fn = "zooreg_diss1.shp" )
-plot(zooregions, add=T )
+#for large range spp only...
+plot(out.spp[out.spp[,1] >10,3],out.spp[out.spp[,1] >10,2]) #plot sds...
+hist(out.spp[out.spp[,1] >10,9],nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="")
+hist(out.spp[out.spp[,1] >10,10],nclass=50,col="grey",xlab="Probability of Rescue (H > MSER-P)",ylab="Frequency of species",main="")
 
 
-dados <- read.table("DADOS_ZOO.txt", h=T)
-coords <- c(dados$X,dados$Y)
-zooreg <- dados$ZooReg
+#persistence...
+sum(ifelse(out.spp[,9] < 0.05,1,0)) / nrow(out.spp)
+sum(ifelse(out.spp[,9] > 0.95,1,0)) / nrow(out.spp)
 
-x11()
-mapas <- rasterFromXYZ(xyz =  cbind(coords, riqueza_lost), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-plot(mapas)
-writeRaster(mapas,"raster_riqueza.asc")
-writeRaster(mapas,"raster_rescue95.asc")
-writeRaster(mapas,"raster_lost.asc")
+sum(ifelse(out.spp[,10] < 0.05,1,0)) / nrow(out.spp)
+sum(ifelse(out.spp[,10] > 0.95,1,0)) / nrow(out.spp)
 
-
-regions<- readShapePoly("wwf_terr_ecos.shp")
-regions@data$BIOME
-plot(raster_prop_perda_Rich_Rescue)
-plot(regions[regions@data$BIOME == 1,], add = T, border = "red")
-View(regions@data)
-
-
-rowSums(PA)
-any(rowSums(rescue_PAM) > rowSums(rescue.P_PAM))
-
-any(rowSums(rescue_PAM) > rowSums(PA))
-
-any(rowSums(rescue.P_PAM) > rowSums(PA))
+median(out.spp[,9])
+median(out.spp[,10])
 
 
 
-paleartic<- rescue$Rescue [which (rescue$zooregions=="PALEARTIC")]
-neartic <- rescue$Rescue [which (rescue$zooregions=="NEARTIC")]
-neotropical <- rescue$Rescue [which (rescue$zooregions=="NEOTROPICAL")]
-australia <- rescue$Rescue [which (rescue$zooregions=="AUSTRALIA")]
-afrotropical <- rescue$Rescue [which (rescue$zooregions=="AFROTROPICAL")]
-malasia <- rescue$Rescue [which (rescue$zooregions=="MALASIA")]
-oceania <- rescue$Rescue [which (rescue$zooregions=="OCEANIA")]
+sum(ifelse(out.spp[,9] <= 0.025,1,0)) / nrow(out.spp)
+sum(ifelse(out.spp[,9] >= 0.975,1,0)) / nrow(out.spp)
 
-length(paleartic)
-length(neartic)
-length(neotropical)
-length(australia)
-length(afrotropical)
-length(oceania)
+sum(ifelse(out.spp[,10] < 0.2,1,0)) / nrow(out.spp)
+sum(ifelse(out.spp[,10] > 0.8,1,0)) / nrow(out.spp)
 
-head(rescue)
-X11()
-par(mfrow=c(4,2))
-hist(rescue$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global")
-hist(neotropical,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Neotropic")
-hist(afrotropical,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Afrotropic")
-hist(malasia,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Indo-Malay")
-hist(australia,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Australasia")
-hist(neartic,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Nearctic")
-hist(paleartic,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Palearctic")
-hist(oceania,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Oceania")
+#rescue and range latitudinal position
+plot(out.spp[,1],out.spp[,9],cex=1,pch=16,xlab="Geographic range",ylab="Probabilit of rescued")
+plot(out.spp[,4],out.spp[,9],cex=1,pch=16,xlab="Latitudinal Midpoint",ylab="Probability of range rescued")
+plot(out.spp[,5],out.spp[,9],cex=1,pch=16,xlab="Longitudinal Midpoint",ylab="Probability of trailing edge rescued")
 
-head(rescue)
-
-#3x3
-X11()
-par(family="serif", cex.lab=1.8, cex.axis=1.8,cex.main = 3)
-tiff("global.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(rescue$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global", ylim=c(0,2500))
-
-dev.off()
-
-tiff("global.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(neotropical,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Neotropic", ylim=c(0,1000))
+#rescue and range latitudinal position
+plot(out.spp[,1],out.spp[ ,10],cex=1,pch=16,xlab="Geographic range",ylab="Probabilit of rescued")
+plot(out.spp[,4],out.spp[,10],cex=1,pch=16,xlab="Latitudinal Midpoint",ylab="Probability of range rescued")
+plot(out.spp[,5],out.spp[,10],cex=1,pch=16,xlab="Longitudinal Midpoint",ylab="Probability of trailing edge rescued")
 
 
-tiff("global.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(afrotropical,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Afrotropic", ylim=c(0,1000))
+summary(lm(out.spp[,9]~log(out.spp[,1])))
 
+summary(lm(out.spp[,9]~log(out.spp[,1])+out.spp[,2]+out.spp[,4]+out.spp[,5]))
 
-
-hist(malasia,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Indo-Malay", ylim=c(0,1000))
-hist(australia,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Australasia", ylim=c(0,200))
-hist(neartic,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Nearctic", ylim=c(0,200))
-hist(paleartic,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Palearctic", ylim=c(0,200))
-hist(oceania,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Oceania", ylim=c(0,200))
-
-
-#4X2
-X11()
-par(family="serif", cex.lab=1.2, cex.axis=1.2,cex.main = 1.8, mar=c(5,4,3,1))
-
-tiff("Global.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(rescue$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global", ylim=c(0,2500))
-dev.off()
-
-
-tiff("Neotropic.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(neotropical,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Neotropic", ylim=c(0,1000))
-dev.off()
-
-tiff("Afrotropic.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(afrotropical,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Afrotropic", ylim=c(0,1000))
-dev.off()
-
-tiff("Indo-Malay.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(malasia,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Indo-Malay", ylim=c(0,1000))
-dev.off()
-
-tiff("Australasia.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(australia,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Australasia", ylim=c(0,200))
-dev.off()
-
-
-tiff("Nearctic.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(neartic,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Nearctic", ylim=c(0,200))
-dev.off()
-
-tiff("Palearctic.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(paleartic,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Palearctic", ylim=c(0,200))
-dev.off()
-
-tiff("Oceania.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(oceania,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Oceania", ylim=c(0,200))
-dev.off()
+max(out.spp[,7]-out.spp[,6])
+min(out.spp[,7]-out.spp[,6])
+median(out.spp[,7]-out.spp[,6]) # 3.75
+median(out.spp[,8])#0.046
+sum(ifelse(out.spp[,9] > 0.05,1,0)) / nrow(out.spp) # hald>0.05 - 55%
+sum(ifelse(out.spp[,9] > 0.95,1,0)) / nrow(out.spp) #12%
+sum(ifelse(out.spp[,10] > 0.05,1,0)) / nrow(out.spp) #79%
+sum(ifelse(out.spp[,10] > 0.95,1,0)) / nrow(out.spp) #44%
+sum(ifelse(out.spp[,9] > 0.95,1,0)) / nrow(out.spp)  #12%
