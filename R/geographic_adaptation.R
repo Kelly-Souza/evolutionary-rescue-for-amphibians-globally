@@ -1,35 +1,30 @@
 #########
-vetorID_rescue <- rescue$ID [which (rescue$Rescue_Save_95==1)]
+setwd("C:/Users/Kelly/Desktop/Frontiers_GitHub")
+rm(list=ls())
 
-rescue_PAM <- PA[, vetorID_rescue]
-str(rescue_PAM)
 
-vetorID_rescueP <- rescue$ID [which (rescue$RescueP_Save_95==1)]
+output <- read.table("Rescue_GLOBAL_RCP85_SN_50_without_DISP_8.5.txt",h=T)
+PA.orig <-read.table("PAM_filtered.txt",h=T)
+coords <-PA.orig[,1:2]
+PA <-PA.orig[,3:7195]
+remove(PA.orig) #release RAM memory
+riq <-rowSums(PA)
+
+
+vetorID_rescueP <- output$ID [which (output$rescuep_save_095==1)]
 rescue.P_PAM <- PA[, vetorID_rescueP]
 
-PAM_rescue <- cbind(coords,rescue_PAM)
-ncol(PAM_rescue)
 PAM_rescueP <- cbind(coords,rescue.P_PAM)
 ncol(PAM_rescueP)
 str(PAM_rescueP)
 
-write.table(PAM_rescue, "PAM_rescue.txt")
 write.table(PAM_rescueP, "PAM_rescueP.txt")
 
 library(raster)
-x11()
-par(mfrow=c(1,1))
-#)
+X11()
 raster_riq <- rasterFromXYZ(xyz =  cbind(coords, riq), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-
 plot(raster_riq)
 writeRaster(raster_riq,"raster_riq.asc")
-
-raster_rescue<- rasterFromXYZ(xyz =  cbind(coords, rowSums(rescue_PAM)), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-plot(raster_rescue)
-writeRaster(raster_rescue,"raster_riq_rescue.95.asc")
-nrow(coords)
-nrow(rescue_PAM)
 
 x11()
 raster_rescueP <- rasterFromXYZ(xyz =  cbind(coords, rowSums(rescue.P_PAM)), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
@@ -38,22 +33,14 @@ writeRaster(raster_rescueP,"raster_riq_rescueP.95.asc")
 
 library(maptools)
 data("wrld_simpl")
-plot(wrld_simpl, add = T, border = "black")
+plot(wrld_simpl, add = T, border = "grey80")
 
 riqueza <- rowSums(PA)
-riqueza_rescue <- rowSums(rescue_PAM)
-riqueza_rescue <- ifelse(test = riqueza > 0, yes = riqueza_rescue, no = NA)
-
-riqueza_rescue_P <- rowSums(rescue.P_PAM)
-riqueza_rescue_P <- ifelse(test = riqueza > 0, yes = riqueza_rescue_P, no = NA)
+riqueza_rescuep <- rowSums(rescue.P_PAM)
+riqueza_rescue_P <- ifelse(test = riqueza > 0, yes = riqueza_rescuep, no = NA)
 
 riqueza <- ifelse(test = riqueza > 0, yes = riqueza, no = NA)
 
-prop_perda_Rich_Rescue <- (riqueza_rescue)/riqueza
-raster_prop_perda_Rich_Rescue <- rasterFromXYZ(xyz =  cbind(coords, prop_perda_Rich_Rescue), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-x11()
-plot(raster_prop_perda_Rich_Rescue)
-writeRaster(raster_prop_perda_Rich_Rescue,"raster_prop_perda_Rich_Rescue.asc")
 
 prop_perda_Rich_Rescue_P <- (riqueza_rescue_P)/riqueza
 raster_prop_perda_Rich_Rescue_P <- rasterFromXYZ(xyz =  cbind(coords, prop_perda_Rich_Rescue_P), res = 1, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
@@ -98,13 +85,13 @@ any(rowSums(rescue.P_PAM) > rowSums(PA))
 
 
 
-paleartic<- rescue$Rescue [which (rescue$zooregions=="PALEARTIC")]
-neartic <- rescue$Rescue [which (rescue$zooregions=="NEARTIC")]
-neotropical <- rescue$Rescue [which (rescue$zooregions=="NEOTROPICAL")]
-australia <- rescue$Rescue [which (rescue$zooregions=="AUSTRALIA")]
-afrotropical <- rescue$Rescue [which (rescue$zooregions=="AFROTROPICAL")]
-malasia <- rescue$Rescue [which (rescue$zooregions=="MALASIA")]
-oceania <- rescue$Rescue [which (rescue$zooregions=="OCEANIA")]
+paleartic<- output$Rescue [which (output$zooregions=="PALEARTIC")]
+neartic <- output$Rescue [which (output$zooregions=="NEARTIC")]
+neotropical <- output$Rescue [which (output$zooregions=="NEOTROPICAL")]
+australia <- output$Rescue [which (output$zooregions=="AUSTRALIA")]
+afrotropical <- output$Rescue [which (output$zooregions=="AFROTROPICAL")]
+malasia <- output$Rescue [which (output$zooregions=="MALASIA")]
+oceania <- output$Rescue [which (output$zooregions=="OCEANIA")]
 
 length(paleartic)
 length(neartic)
@@ -116,7 +103,7 @@ length(oceania)
 head(rescue)
 X11()
 par(mfrow=c(4,2))
-hist(rescue$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global")
+hist(output$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global")
 hist(neotropical,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Neotropic")
 hist(afrotropical,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Afrotropic")
 hist(malasia,nclass=50,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="",main="Indo-Malay")
@@ -131,7 +118,7 @@ head(rescue)
 X11()
 par(family="serif", cex.lab=1.8, cex.axis=1.8,cex.main = 3)
 tiff("global.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(rescue$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global", ylim=c(0,2500))
+hist(output$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global", ylim=c(0,2500))
 
 dev.off()
 
@@ -156,7 +143,7 @@ X11()
 par(family="serif", cex.lab=1.2, cex.axis=1.2,cex.main = 1.8, mar=c(5,4,3,1))
 
 tiff("Global.tif",  res = 300, width = 300/72*300, height = 300/72*300)
-hist(rescue$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global", ylim=c(0,2500))
+hist(output$Rescue,nclass=100,col="grey",xlab="Probability of Rescue (H > MSER)",ylab="Frequency of species",main="Global", ylim=c(0,2500))
 dev.off()
 
 
